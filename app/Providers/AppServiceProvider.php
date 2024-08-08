@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Facades\AuthFacade;
 use App\Services\AuthService;
 use App\Services\CertificateService;
+use App\Services\DivisionService;
 use App\Services\StaffService;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('auth.facade', AuthService::class);
         $this->app->bind('staff.facade', StaffService::class);
         $this->app->bind('certificate.facade', CertificateService::class);
+        $this->app->bind('division.facade', DivisionService::class);
     }
 
     private function settings()

@@ -18,13 +18,13 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('staff')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'all']);
-    Route::post('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'create']);
+    Route::get('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'all'])->middleware('auth:sanctum');
+    Route::post('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'create'])->middleware('auth:sanctum');
     Route::prefix('{staff}')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'get']);
+        Route::get('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'get'])->middleware('auth:sanctum');
     });
 });
 
 Route::prefix('division')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Api\v1\DivisionController::class, 'all']);
+    Route::get('/', [\App\Http\Controllers\Api\v1\DivisionController::class, 'list']);
 });

@@ -15,6 +15,7 @@ class StaffService
     {
         $cert = $data['cert'];
         $data['full_name'] = "{$data['last_name']} {$data['first_name']} {$data['middle_name']}";
+        $data['job_title'] = ucfirst(strtolower($data['job_title']));
         $createdStaff = Staff::create($data);
 
         $cert['staff_id'] = $createdStaff->id;

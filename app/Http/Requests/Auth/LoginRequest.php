@@ -4,6 +4,7 @@ namespace App\Http\Requests\Auth;
 
 use App\Facades\AuthFacade;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class LoginRequest extends FormRequest
 {
@@ -20,12 +21,13 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    public function login(): array
+    public function login(): \Illuminate\Http\JsonResponse
     {
-        return [
+        return response()->json([
             'token' => AuthFacade::login(
                 $this->validated(),
-            )
-        ];
+            ),
+            'user' => Auth::user(),
+        ]);
     }
 }
