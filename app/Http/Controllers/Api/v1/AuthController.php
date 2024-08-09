@@ -14,12 +14,20 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
-        return $request->login();
+        $request->authenticate();
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        return response()->json([
+            'user' => $user,
+            'token' => $user->createToken('default')->plainTextToken,
+        ]);
     }
 
     public function currentUser(): array
     {
-        return UserResource::make(auth('sanctum')->user())->resolve();
+        return UserResource::make(Auth::user())->resolve();
     }
 
     public function register(RegisterRequest $request)
@@ -28,7 +36,7 @@ class AuthController extends Controller
 
         $user = User::create($data);
 
-        Auth::guard('api')->login($user);
+        Auth::login($user);
 
         return '';
     }

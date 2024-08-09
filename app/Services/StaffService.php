@@ -23,12 +23,25 @@ class StaffService
         $createdCert = Certification::create($cert);
 
         return response()->json([
-           'message' => 'Персона создана!'
+            'status' => 'ok',
+            'message' => 'Персона создана!'
         ])->setStatusCode(201);
     }
 
     public function get(array $data)
     {
 
+    }
+
+    public function update(Staff $staff, array $data): \Illuminate\Http\JsonResponse
+    {
+        $cert = $data['cert'];
+        $staff->update($data);
+        $staff->certification()->update($cert);
+
+        return response()->json([
+            'status' => 'ok',
+            'message' => 'Информация о пользователе обновлена!'
+        ]);
     }
 }

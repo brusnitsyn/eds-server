@@ -4,6 +4,7 @@ namespace App\Http\Resources\Staff;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 
 class ShortStaffResource extends JsonResource
 {
@@ -28,6 +29,7 @@ class ShortStaffResource extends JsonResource
             'job_title' => $this->job_title,
             'tel' => $this->tel,
             'division_id' => $this->division_id,
+            'cert_valid_to' => Carbon::createFromTimestampMs($this->certification->valid_to)->format("d.m.Y")
         ];
     }
 }

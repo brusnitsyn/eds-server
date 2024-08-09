@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Staff\CreateStaffRequest;
+use App\Http\Requests\Staff\UpdateStaffRequest;
 use App\Http\Resources\Staff\FullStaffResource;
 use App\Http\Resources\Staff\ShortStaffCollection;
 use App\Http\Resources\Staff\ShortStaffResource;
@@ -25,5 +26,10 @@ class StaffController extends Controller
     public function get(Staff $staff)
     {
         return FullStaffResource::make($staff);
+    }
+
+    public function update(Staff $staff, UpdateStaffRequest $request)
+    {
+        return $request->update($staff);
     }
 }

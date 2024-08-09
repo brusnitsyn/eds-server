@@ -43,13 +43,15 @@ class CertificateService
         $middle_name = $explodeFullName[2];
         $last_name = $explodeFullName[0];
 
+        $job_title = Str::ucfirst(Str::lower($parsedSubject['title'] ?? ''));
+
         $result = [
             'cert' => [
                 'serial_number' => $serialNumber,
                 'valid_from' => Carbon::parse($parsedCert['validFrom_time_t'])->valueOf(),
                 'valid_to' => Carbon::parse($parsedCert['validTo_time_t'])->valueOf(),
             ],
-            'job_title' => $parsedSubject['title'],
+            'job_title' => $job_title,
             'full_name' => $full_name,
             'first_name' => $first_name,
             'middle_name' => $middle_name,
