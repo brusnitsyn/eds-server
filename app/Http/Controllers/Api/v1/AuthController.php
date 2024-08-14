@@ -14,15 +14,11 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
-        $request->authenticate();
-        $request->session()->regenerate();
-
-        $user = Auth::user();
-
-        return response()->json([
-            'user' => $user,
-            'token' => $user->createToken('default')->plainTextToken,
-        ]);
+        return $request->authenticate();
+//        return response()->json([
+//            'user' => $user,
+//            'token' => $user->createToken('default')->plainTextToken,
+//        ]);
     }
 
     public function currentUser(): array
