@@ -17,7 +17,7 @@ class AuthController extends Controller
         return $request->authenticate();
     }
 
-    public function currentUser(): array
+    public function currentUser(Request $request): array
     {
         return UserResource::make(Auth::user())->resolve();
     }
