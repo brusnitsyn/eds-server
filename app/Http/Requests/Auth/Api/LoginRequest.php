@@ -4,6 +4,7 @@ namespace App\Http\Requests\Auth\Api;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -44,11 +45,17 @@ class LoginRequest extends FormRequest
 
         $userPassword = $user->password;
 
-        if (!Hash::check($password, $userPassword)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+        if (!Auth::attempt($this->validated())) {
+            return response()->json([
+                'message' => __('auth.failed')
+            ], 401);
         }
+
+//        if (!Hash::check($password, $userPassword)) {
+//            throw ValidationException::withMessages([
+//                'email' => ['The provided credentials are incorrect.'],
+//            ]);
+//        }
 
         $response = [
             'token' => $user->createToken('default')->plainTextToken,
