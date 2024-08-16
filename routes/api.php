@@ -14,6 +14,7 @@ Route::prefix('certificate')->group(function () {
 Route::prefix('auth')->group(function () {
     Route::post('/login', [\App\Http\Controllers\Api\v1\AuthController::class, 'login'])->middleware('guest');
     Route::post('/create', [\App\Http\Controllers\Api\v1\AuthController::class, 'register'])->middleware('auth:sanctum');
+    Route::post('/user', [\App\Http\Controllers\Api\v1\AuthController::class, 'currentUser'])->middleware('auth:sanctum');
 });
 
 Route::prefix('staff')->group(function () {

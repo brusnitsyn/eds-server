@@ -17,6 +17,11 @@ class AuthController extends Controller
         return $request->authenticate();
     }
 
+    public function currentUser(): array
+    {
+        return UserResource::make(Auth::user())->resolve();
+    }
+
     public function register(RegisterRequest $request)
     {
         $data = $request->validated();
