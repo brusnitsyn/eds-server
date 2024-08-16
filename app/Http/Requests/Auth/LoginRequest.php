@@ -1,10 +1,11 @@
 <?php
-
 namespace App\Http\Requests\Auth;
 
-use App\Models\User;
+use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
@@ -35,25 +36,50 @@ class LoginRequest extends FormRequest
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function authenticate(): \Illuminate\Http\JsonResponse
+    public function authenticate(): void
     {
-        $login = $this->validated('login');
-        $password = $this->validated('password');
+        $this->ensureIsNotRateLimited();
 
-        $user = User::where('login', $login)->first();
+        if (!Auth::attempt($this->only('login', 'password'), $this->boolean('remember'))) {
+            RateLimiter::hit($this->throttleKey());
 
-        $userPassword = $user->password;
-
-        if (!Hash::check($password, $userPassword)) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'login' => __('auth.failed'),
             ]);
         }
 
-        $response = [
-            'token' => $user->createToken('default')->plainTextToken,
-        ];
+        RateLimiter::clear($this->throttleKey());
+    }
 
-        return response()->json($response);
+    /**
+     * Ensure the login request is not rate limited.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function ensureIsNotRateLimited(): void
+    {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+            return;
+        }
+
+        event(new Lockout($this));
+
+        $seconds = RateLimiter::availableIn($this->throttleKey());
+
+        throw ValidationException::withMessages([
+            'login' => trans('auth.throttle', [
+                'seconds' => $seconds,
+                'minutes' => ceil($seconds / 60),
+            ]),
+        ]);
+    }
+
+    /**
+     * Get the rate limiting throttle key for the request.
+     */
+    public function throttleKey(): string
+    {
+        return Str::transliterate(Str::lower($this->input('login')) . '|' . $this->ip());
     }
 }
+

@@ -17,7 +17,7 @@ return [
 
     'paths' => ['api/*'],
 
-    'allowed_methods' => ['*'],
+    'allowed_methods' => [env('FRONTEND_URL', 'http://localhost:3000')],
 
     'allowed_origins' => ['*'],
 
