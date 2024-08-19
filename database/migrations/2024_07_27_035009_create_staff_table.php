@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('gender', ['liza', 'slava']);
             $table->timestamp('dob')->nullable();
             $table->string('tel')->nullable();
-            $table->foreignIdFor(\App\Models\Division::class)->nullable();
+            $table->foreignIdFor(\App\Models\Division::class);
             $table->timestamps();
         });
     }
