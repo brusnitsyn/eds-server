@@ -36,7 +36,7 @@ class CreateStaffRequest extends FormRequest
             'gender' => ['required'],
             'job_title' => ['required', 'string'],
             'tel' => ['nullable', 'string'],
-            'division_id' => ['required', 'exists:divisions,id']
+            'division_id' => ['nullable']
         ];
     }
 
