@@ -3,6 +3,7 @@
 namespace App\Facades;
 
 use App\Models\Staff;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Facade;
 
 /**
