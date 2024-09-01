@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -22,8 +23,18 @@ class CertificateService
     public function readPropsCert(UploadedFile $certFile)
     {
         $certName = $certFile->getClientOriginalName();
-        $certPath = Storage::disk('local')->putFileAs('/certifications', $certFile, $certName);
-        $certContents = file_get_contents(Storage::disk('local')->path($certPath));
+        $certPath = Storage::disk('certification')->putFileAs($certName, $certFile, $certName);
+
+        $result = $this->getInfoCertificate($certPath);
+
+        return response()
+            ->json($result)
+            ->setStatusCode(200);
+    }
+
+    public function getInfoCertificate(string $certificatePath)
+    {
+        $certContents = file_get_contents($certificatePath);
 
         $certificateCAPemContent = '-----BEGIN CERTIFICATE-----'.PHP_EOL
             .chunk_split(base64_encode($certContents), 64, PHP_EOL)
@@ -60,8 +71,6 @@ class CertificateService
             'inn' => $parsedSubject['INN']
         ];
 
-        return response()
-            ->json($result)
-            ->setStatusCode(200);
+        return $result;
     }
 }

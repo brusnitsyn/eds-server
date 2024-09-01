@@ -3,24 +3,135 @@
 namespace App\Services;
 
 use App\Exceptions\InvalidCredentialsException;
+use App\Facades\CertificateFacade;
 use App\Models\Certification;
 use App\Models\Staff;
 use App\Models\User;
+use Illuminate\Http\File;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class StaffService
 {
     public function create(array $data): \Illuminate\Http\JsonResponse
     {
-        $cert = $data['cert'];
-        $data['full_name'] = "{$data['last_name']} {$data['first_name']} {$data['middle_name']}";
-        $data['job_title'] = ucfirst(strtolower($data['job_title']));
-        $createdStaff = Staff::create($data);
+        $isPackage = $data['is_package'];
+        $archive = $data['archive'];
 
-        $cert['staff_id'] = $createdStaff->id;
+        if ($isPackage) {
+            return $this->readMany($archive);
+        }
 
-        $createdCert = Certification::create($cert);
+        $certificationFiles = $this->readCertificationArchive($archive, 'certifications');
+        $path = Storage::disk('temp')->path($certificationFiles[0]);
+        $pathinfo = pathinfo($path);
+        $certStorage = $this->copyToCertificationDirectory($pathinfo['filename']);
+
+        if ($certStorage) {
+            $certStorageTempPath = pathinfo(Storage::disk('temp')->path($certificationFiles[0]));
+            $certStoragePath = Storage::disk('certification')->path("{$certStorageTempPath['filename']}/{$certStorageTempPath['basename']}");
+            $certInfo = CertificateFacade::getInfoCertificate($certStoragePath);
+
+            $createdStaff = Staff::where('snils', $certInfo['snils'])->first();
+            $certInfo['cert']['path_certification'] = "certifications/{$certStorageTempPath['filename']}";
+            $certInfo['full_name'] = "{$certInfo['last_name']} {$certInfo['first_name']} {$certInfo['middle_name']}";
+            $certInfo['job_title'] = ucfirst(strtolower($certInfo['job_title']));
+
+            if(!$createdStaff) {
+                $createdStaff = Staff::create($certInfo);
+                $createdStaff->certification()->create($certInfo['cert']);
+            }
+
+            $createdStaff->certification()->update($certInfo['cert']);
+        }
+
+        return response()->json([
+            'status' => 'ok',
+            'message' => 'Персона создана!'
+        ])->setStatusCode(201);
+    }
+
+    private function readCertificationArchive($archivePath, $tempPath = 'archives') {
+        $zipTool = new \ZipArchive();
+        $zipTool->open($archivePath);
+        $extractionPath = storage_path("app/temp/{$tempPath}");
+        if (Storage::disk('temp')->exists($tempPath)) {
+            Storage::disk('temp')->deleteDirectory($tempPath);
+            Storage::disk('temp')->makeDirectory($tempPath);
+        }
+
+        $zipTool->extractTo($extractionPath);
+        $zipTool->close();
+
+        return Storage::disk('temp')->files("/{$tempPath}");
+    }
+
+    private function readMany($archive) {
+        $zips = $this->readCertificationArchive($archive->getRealPath());
+
+        foreach ($zips as $zip) {
+            $path = Storage::disk('temp')->path($zip);
+            $certificationFiles = $this->readCertificationArchive($path, 'certifications');
+            $pathinfo = pathinfo($path);
+
+            $certStorage = $this->copyToCertificationDirectory($pathinfo['filename']);
+
+            if ($certStorage) {
+                $certStorageTempPath = pathinfo(Storage::disk('temp')->path($certificationFiles[0]));
+                $certStoragePath = Storage::disk('certification')->path("{$certStorageTempPath['filename']}/{$certStorageTempPath['basename']}");
+                $certInfo = CertificateFacade::getInfoCertificate($certStoragePath);
+
+                $createdStaff = Staff::where('snils', $certInfo['snils'])->first();
+                $certInfo['cert']['path_certification'] = "certifications/{$certStorageTempPath['filename']}";
+                $certInfo['full_name'] = "{$certInfo['last_name']} {$certInfo['first_name']} {$certInfo['middle_name']}";
+                $certInfo['job_title'] = ucfirst(strtolower($certInfo['job_title']));
+
+                if(!$createdStaff) {
+                    $createdStaff = Staff::create($certInfo);
+                    $createdStaff->certification()->create($certInfo['cert']);
+                }
+
+                $createdStaff->certification()->update($certInfo['cert']);
+            }
+        }
+
+        return response()->json([
+            'status' => 'ok',
+            'message' => 'Архив отправлен на обработку!'
+        ])->setStatusCode(201);
+    }
+
+    private function copyToCertificationDirectory($folderName) {
+        $temp = Storage::disk('temp')->path('/certifications');
+        $dir = Storage::disk('certification')->path($folderName);
+        $hasCopied = \Illuminate\Support\Facades\File::copyDirectory($temp, $dir);
+        return $hasCopied ? $dir : false;
+    }
+
+    public function createMany(UploadedFile $archive): \Illuminate\Http\JsonResponse
+    {
+        $zipTool = new \ZipArchive();
+        $zipTool->open($archive->getRealPath());
+        $storagePath = "/certifications";
+        $extractionPath = storage_path("app/temp/certifications");
+
+        if (!Storage::disk('temp')->exists($storagePath)) {
+            Storage::disk('temp')->makeDirectory($storagePath);
+        }
+
+        $zipTool->extractTo($extractionPath);
+        $zipTool->close();
+
+        $certifications = Storage::disk('temp')->files('/certifications');
+
+        foreach ($certifications as $certification) {
+            $path = Storage::disk('temp')->path($certification);
+            $zipTool->open($path);
+            dd($zipTool->count());
+        }
 
         return response()->json([
             'status' => 'ok',
