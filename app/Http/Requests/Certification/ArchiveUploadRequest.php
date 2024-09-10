@@ -24,7 +24,7 @@ class ArchiveUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'archive' => ['required', 'file', 'mimetypes:application/zip'],
+            'archive' => ['required', 'mimes:zip'],
             'is_package' => ['required', 'boolean']
         ];
     }
