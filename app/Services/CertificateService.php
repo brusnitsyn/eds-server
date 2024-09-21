@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -32,9 +33,22 @@ class CertificateService
             ->setStatusCode(200);
     }
 
-    public function getInfoCertificate(string $certificatePath)
+    public function getInfoCertificate(string $disk, string $folder)
     {
-        $certContents = file_get_contents($certificatePath);
+        $files = Storage::disk($disk)->files($folder);
+        $certificateFile = null;
+        foreach ($files as $file) {
+            if (pathinfo($file, PATHINFO_EXTENSION) == "cer") {
+                $certificateFile = Storage::disk($disk)->path($file);
+            }
+        }
+        Log::info($folder);
+        Log::info($files);
+        Log::info($certificateFile);
+
+        if ($certificateFile == null) {return;}
+
+        $certContents = file_get_contents($certificateFile);
 
         $certificateCAPemContent = '-----BEGIN CERTIFICATE-----'.PHP_EOL
             .chunk_split(base64_encode($certContents), 64, PHP_EOL)

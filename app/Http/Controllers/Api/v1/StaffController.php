@@ -15,7 +15,8 @@ class StaffController extends Controller
 {
     public function all()
     {
-        return new ShortStaffCollection(Staff::all());
+        $staff = Staff::paginate(30);
+        return new ShortStaffCollection($staff);
     }
 
     public function create(CreateStaffRequest $request)

@@ -12,6 +12,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class StaffService
@@ -30,23 +31,7 @@ class StaffService
         $pathinfo = pathinfo($path);
         $certStorage = $this->copyToCertificationDirectory($pathinfo['filename']);
 
-        if ($certStorage) {
-            $certStorageTempPath = pathinfo(Storage::disk('temp')->path($certificationFiles[0]));
-            $certStoragePath = Storage::disk('certification')->path("{$certStorageTempPath['filename']}/{$certStorageTempPath['basename']}");
-            $certInfo = CertificateFacade::getInfoCertificate($certStoragePath);
-
-            $createdStaff = Staff::where('snils', $certInfo['snils'])->first();
-            $certInfo['cert']['path_certification'] = "certifications/{$certStorageTempPath['filename']}";
-            $certInfo['full_name'] = "{$certInfo['last_name']} {$certInfo['first_name']} {$certInfo['middle_name']}";
-            $certInfo['job_title'] = ucfirst(strtolower($certInfo['job_title']));
-
-            if(!$createdStaff) {
-                $createdStaff = Staff::create($certInfo);
-                $createdStaff->certification()->create($certInfo['cert']);
-            }
-
-            $createdStaff->certification()->update($certInfo['cert']);
-        }
+        $this->createCert($certStorage, $certificationFiles[0], $path);
 
         return response()->json([
             'status' => 'ok',
@@ -57,7 +42,9 @@ class StaffService
     private function readCertificationArchive($archivePath, $tempPath = 'archives') {
         $zipTool = new \ZipArchive();
         $zipTool->open($archivePath);
-        $extractionPath = storage_path("app/temp/{$tempPath}");
+        $pathInfo = pathinfo($archivePath);
+        $archiveName = $pathInfo['filename'];
+        $extractionPath = storage_path("app/temp/$tempPath/$archiveName");
         if (Storage::disk('temp')->exists($tempPath)) {
             Storage::disk('temp')->deleteDirectory($tempPath);
             Storage::disk('temp')->makeDirectory($tempPath);
@@ -66,7 +53,7 @@ class StaffService
         $zipTool->extractTo($extractionPath);
         $zipTool->close();
 
-        return Storage::disk('temp')->files("/{$tempPath}");
+        return Storage::disk('temp')->files("/$tempPath/$archiveName");
     }
 
     private function readMany($archive) {
@@ -75,27 +62,10 @@ class StaffService
         foreach ($zips as $zip) {
             $path = Storage::disk('temp')->path($zip);
             $certificationFiles = $this->readCertificationArchive($path, 'certifications');
-            $pathinfo = pathinfo($path);
 
-            $certStorage = $this->copyToCertificationDirectory($pathinfo['filename']);
+            $certStorage = $this->copyToCertificationDirectory();
 
-            if ($certStorage) {
-                $certStorageTempPath = pathinfo(Storage::disk('temp')->path($certificationFiles[0]));
-                $certStoragePath = Storage::disk('certification')->path("{$certStorageTempPath['filename']}/{$certStorageTempPath['basename']}");
-                $certInfo = CertificateFacade::getInfoCertificate($certStoragePath);
-
-                $createdStaff = Staff::where('snils', $certInfo['snils'])->first();
-                $certInfo['cert']['path_certification'] = "certifications/{$certStorageTempPath['filename']}";
-                $certInfo['full_name'] = "{$certInfo['last_name']} {$certInfo['first_name']} {$certInfo['middle_name']}";
-                $certInfo['job_title'] = ucfirst(strtolower($certInfo['job_title']));
-
-                if(!$createdStaff) {
-                    $createdStaff = Staff::create($certInfo);
-                    $createdStaff->certification()->create($certInfo['cert']);
-                }
-
-                $createdStaff->certification()->update($certInfo['cert']);
-            }
+            $this->createCert($certStorage, $certificationFiles[0], $path);
         }
 
         return response()->json([
@@ -104,7 +74,7 @@ class StaffService
         ])->setStatusCode(201);
     }
 
-    private function copyToCertificationDirectory($folderName) {
+    private function copyToCertificationDirectory($folderName = "") {
         $temp = Storage::disk('temp')->path('/certifications');
         $dir = Storage::disk('certification')->path($folderName);
         $hasCopied = \Illuminate\Support\Facades\File::copyDirectory($temp, $dir);
@@ -154,5 +124,32 @@ class StaffService
             'status' => 'ok',
             'message' => 'Информация о пользователе обновлена!'
         ]);
+    }
+
+    /**
+     * @param string $certStorage
+     * @param $path1
+     * @param string $path
+     * @return void
+     */
+    public function createCert(string $certStorage, $path1, string $path): void
+    {
+        if ($certStorage) {
+            $certStorageTempPath = pathinfo(Storage::disk('temp')->path($path1));
+            $folder = pathinfo($path, PATHINFO_FILENAME);
+            $certInfo = CertificateFacade::getInfoCertificate('certification', $folder);
+
+            $createdStaff = Staff::where('snils', $certInfo['snils'])->first();
+            $certInfo['cert']['path_certification'] = "certifications/{$certStorageTempPath['filename']}";
+            $certInfo['full_name'] = "{$certInfo['last_name']} {$certInfo['first_name']} {$certInfo['middle_name']}";
+            $certInfo['job_title'] = ucfirst(strtolower($certInfo['job_title']));
+
+            if (!$createdStaff) {
+                $createdStaff = Staff::create($certInfo);
+                $createdStaff->certification()->create($certInfo['cert']);
+            }
+
+            $createdStaff->certification()->update($certInfo['cert']);
+        }
     }
 }

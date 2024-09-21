@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static readPropsCert($certFile)
- * @method static getInfoCertificate($certificatePath)
+ * @method static getInfoCertificate(string $disk, string $folder)
  *
  * @see \App\Services\CertificateService
  */
