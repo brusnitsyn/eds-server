@@ -47,12 +47,32 @@ return [
         'temp' => [
             'driver' => 'local',
             'root' => storage_path('app/temp'),
+            'permissions' => [
+                'file' => [
+                    'public' => 0644,
+                    'private' => 0600,
+                ],
+                'dir' => [
+                    'public' => 0755,
+                    'private' => 0700,
+                ]
+            ],
             'throw' => false,
         ],
 
         'certification' => [
             'driver' => 'local',
             'root' => storage_path('app/certifications'),
+            'permissions' => [
+                'file' => [
+                    'public' => 0644,
+                    'private' => 0600,
+                ],
+                'dir' => [
+                    'public' => 0755,
+                    'private' => 0700,
+                ]
+            ],
             'throw' => false,
         ],
 
