@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class StaffService
 {
@@ -35,18 +36,17 @@ class StaffService
             }
         }
 
-        $pathinfo = pathinfo($certificateFile);
-        $certStorage = $this->copyToCertificationDirectory($pathinfo['filename']);
+        $certificateFileName = Str::trim(pathinfo($certificateFile, PATHINFO_FILENAME));
+        $certificateFolder = dirname($certificateFile);
+        $certStorage = $this->copyToCertificationDirectory($certificateFileName);
 
-        $this->createCert($certStorage, $certificateFile, $certificateFile);
+        $this->createCert($certStorage, $certificateFolder, $certificateFileName);
 
         return response()->json([
             'status' => 'ok',
             'message' => 'Персона создана!'
         ])->setStatusCode(201);
     }
-
-
 
     private function readCertificationArchive($archivePath, $tempPath = 'archives', $isCertArchive = false) {
         $zipTool = new \ZipArchive();
@@ -70,11 +70,6 @@ class StaffService
         return Storage::disk('temp')->files("/$tempPath/$archiveName");
     }
 
-//    private function readCertificationArchive(string $archivePath, $tempPath = 'archives', $isCertArchive = false)
-//    {
-//
-//    }
-
     private function extractToFolder(string $archivePath, $tempPath = 'archives')
     {
         $zipTool = new \ZipArchive();
@@ -87,13 +82,13 @@ class StaffService
             Storage::disk('temp')->makeDirectory($tempPath);
         }
 
-        $hasExtracted = $zipTool->extractTo($extractionPath);
+        $zipTool->extractTo($extractionPath);
         $zipTool->close();
 
         return Storage::disk('temp')->path($tempPath);
     }
 
-    private function getCertificateName(string $disk, string $folder) {
+    private function getCertificatePath(string $disk, string $folder) {
         $files = Storage::disk($disk)->files($folder);
         $certificateFile = null;
         foreach ($files as $file) {
@@ -105,15 +100,20 @@ class StaffService
         return $certificateFile;
     }
 
-    private function readMany($archive) {
-        $folderZips = $this->extractToFolder($archive->getRealPath()); // Получить файлы по пути
+    public function getCertificateFileName(string $path)
+    {
+        return Str::trim(pathinfo($path, PATHINFO_FILENAME));
+    }
 
+    private function readMany($archive) {
+        $this->extractToFolder($archive->getRealPath());
+        $zips = Storage::disk('temp')->files('/archives');
 
         foreach ($zips as $zip) {
             $path = Storage::disk('temp')->path($zip);
             $certificationFolder = $this->extractToFolder($path, 'certifications');
-            $certificationFileName = $this->getCertificateName('temp', $certificationFolder);
-
+            $certificationPathToFile = $this->getCertificatePath('temp', 'certifications');
+            $certificationFileName = $this->getCertificateFileName($certificationPathToFile);
             if ($certificationFileName) {
                 $certStorage = $this->copyToCertificationDirectory($certificationFileName);
                 $this->createCert($certStorage, $certificationFolder, $certificationFileName);
@@ -126,38 +126,11 @@ class StaffService
         ])->setStatusCode(201);
     }
 
-    private function copyToCertificationDirectory($folderName = "") {
+    private function copyToCertificationDirectory($certificationFolderName = "") {
         $temp = Storage::disk('temp')->path('/certifications');
-        $dir = Storage::disk('certification')->path($folderName);
+        $dir = Storage::disk('certification')->path($certificationFolderName);
         $hasCopied = \Illuminate\Support\Facades\File::copyDirectory($temp, $dir);
         return $hasCopied ? $dir : false;
-    }
-
-    public function createMany(UploadedFile $archive): \Illuminate\Http\JsonResponse
-    {
-        $zipTool = new \ZipArchive();
-        $zipTool->open($archive->getRealPath());
-        $storagePath = "/certifications";
-        $extractionPath = storage_path("app/temp/certifications");
-
-        if (!Storage::disk('temp')->exists($storagePath)) {
-            Storage::disk('temp')->makeDirectory($storagePath);
-        }
-
-        $zipTool->extractTo($extractionPath);
-        $zipTool->close();
-
-        $certifications = Storage::disk('temp')->files('/certifications');
-
-        foreach ($certifications as $certification) {
-            $path = Storage::disk('temp')->path($certification);
-            $zipTool->open($path);
-        }
-
-        return response()->json([
-            'status' => 'ok',
-            'message' => 'Персона создана!'
-        ])->setStatusCode(201);
     }
 
     public function get(array $data)
