@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Session\Store;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -163,6 +164,17 @@ class StaffService
             $certInfo = CertificateFacade::getInfoCertificate('certification', $folderName);
 
             $createdStaff = Staff::where('snils', $certInfo['snils'])->first();
+
+            $now = Carbon::now();
+            $validTo = Carbon::createFromTimestampMs($certInfo['cert']['valid_to']);
+
+            if ($validTo->isFuture()) {
+                if ($now->diffInMonths($validTo) < 1) {
+                    $certInfo['cert']['is_request_new'] = true;
+                }
+                $certInfo['cert']['is_valid'] = true;
+            }
+
             $certInfo['cert']['path_certification'] = "certifications/{$certStorageTempPath['filename']}";
             $certInfo['full_name'] = "{$certInfo['last_name']} {$certInfo['first_name']} {$certInfo['middle_name']}";
             $certInfo['job_title'] = ucfirst(strtolower($certInfo['job_title']));
