@@ -29,7 +29,9 @@ class ShortStaffResource extends JsonResource
             'job_title' => $this->job_title,
             'tel' => $this->tel,
             'division_id' => $this->division_id,
-            'cert_valid_to' => Carbon::createFromTimestampMs($this->certification->valid_to)->format("d.m.Y")
+            'cert_valid_to' => Carbon::createFromTimestampMs($this->certification->valid_to)->format("d.m.Y"),
+            'has_valid' => $this->certification->is_valid,
+            'has_request_new' => $this->certification->is_request_new
         ];
     }
 }
