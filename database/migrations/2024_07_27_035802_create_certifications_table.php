@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('serial_number');
             $table->string('valid_from');
             $table->string('valid_to');
+            $table->boolean('is_valid')->default(false);
+            $table->boolean('is_request_new')->default(false);
             $table->string('path_certification')->nullable();
             $table->foreignIdFor(\App\Models\Staff::class);
             $table->timestamps();

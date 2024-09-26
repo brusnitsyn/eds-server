@@ -14,6 +14,8 @@ class Certification extends Model
         'serial_number',
         'valid_from',
         'valid_to',
+        'is_valid',
+        'is_request_new',
         'path_certification',
         'staff_id'
     ];
