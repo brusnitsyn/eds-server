@@ -40,6 +40,8 @@ class StaffController extends Controller
             $query->where($searchColumn, 'ilike', $searchValue . '%');
         }
 
+        $query->orderBy('full_name', 'ASC');
+
         $staff = $query->paginate(30);
 
         return new ShortStaffCollection($staff);
