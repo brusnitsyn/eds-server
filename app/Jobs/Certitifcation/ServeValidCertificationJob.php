@@ -9,6 +9,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class ServeValidCertificationJob implements ShouldQueue
 {
@@ -30,12 +31,13 @@ class ServeValidCertificationJob implements ShouldQueue
         $certifications = Certification::all();
 
         foreach ($certifications as $certification) {
-            if (!($certification->valid_to < Carbon::now()->timestamp)) {
+
+            if (!(Carbon::createFromTimestampMs($certification->valid_to) < Carbon::now()->timestamp)) {
                 $certification->update(['is_valid' => false]);
                 continue;
             }
 
-            if (Carbon::diffInMonths($certification->validTo) < 1) $certification->update(['is_request_new' => true]);
+            if (Carbon::createFromTimestampMs($certification->valid_to) < 1) $certification->update(['is_request_new' => true]);
         }
     }
 }
