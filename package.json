@@ -1,0 +1,15 @@
+{
+    "name": "eds-server",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "queue:start": "php artisan queue:restart && npm run queue:remove && pm2 start pm2.json",
+        "queue:remove": "pm2 delete pm2.json"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/brusnitsyn/eds-server.git"
+    },
+    "private": true
+}
