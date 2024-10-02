@@ -171,8 +171,12 @@ class StaffService
             if ($validTo->isFuture()) {
                 if ($now->diffInMonths($validTo) < 1) {
                     $certInfo['cert']['is_request_new'] = true;
+                } else {
+                    $certInfo['cert']['is_request_new'] = false;
                 }
                 $certInfo['cert']['is_valid'] = true;
+            } else {
+                $certInfo['cert']['is_valid'] = false;
             }
 
             $certInfo['cert']['path_certification'] = "certifications/{$certStorageTempPath['filename']}";
