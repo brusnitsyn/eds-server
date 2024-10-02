@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\Staff;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use ZipArchive;
 
 class CertificateService
 {
@@ -78,5 +80,33 @@ class CertificateService
         ];
 
         return $result;
+    }
+
+    public function download(array $staffIds)
+    {
+        $staffs = Staff::whereIn('id', $staffIds)->get();
+        $timestampNow = Carbon::now()->getTimestampMs();
+        $zipPath = Storage::disk('files')->path('');
+        $zipName = "$timestampNow.zip";
+        $zip = new ZipArchive();
+        $zip->open("$zipPath/$zipName", ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+        if (count($staffIds) == 0) {
+            return response()->json([
+                /// TODO:
+            ], 404);
+        }
+
+        foreach ($staffs as $staff) {
+            $certFiles = Storage::allFiles($staff->certification->path_certification);
+            foreach ($certFiles as $certFile) {
+                $filePath = Storage::path($certFile);
+                $zip->addFile($filePath, $certFile);
+            }
+        }
+
+        $zip->close();
+
+        return Storage::download("files/$zipName");
     }
 }

@@ -10,6 +10,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::prefix('certificate')->group(function () {
     Route::post('/read', [\App\Http\Controllers\Api\v1\Certification\CertificateReaderController::class, 'uploadCertification'])->middleware('auth:sanctum');
     Route::post('/upload', [\App\Http\Controllers\Api\v1\Certification\CertificateController::class, 'archiveUpload'])->middleware('auth:sanctum');
+    Route::post('/download', [\App\Http\Controllers\Api\v1\Certification\CertificateController::class, 'downloadCert'])->middleware('auth:sanctum');
 });
 
 Route::prefix('auth')->group(function () {
