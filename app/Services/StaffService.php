@@ -129,6 +129,11 @@ class StaffService
 
     private function copyToCertificationDirectory($certificationFolderName = "") {
         $temp = Storage::disk('temp')->path('/certifications');
+
+        if (Storage::disk('certification')->exists($certificationFolderName)) {
+            Storage::disk('certification')->deleteDirectory($certificationFolderName);
+        }
+
         $dir = Storage::disk('certification')->path($certificationFolderName);
         $hasCopied = \Illuminate\Support\Facades\File::copyDirectory($temp, $dir);
         return $hasCopied ? $dir : false;
