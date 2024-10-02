@@ -44,6 +44,14 @@ return [
             'throw' => false,
         ],
 
+        'files' => [
+            'driver' => 'local',
+            'root' => storage_path('app/files'),
+            'url' => env('APP_URL').'/files',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
         'temp' => [
             'driver' => 'local',
             'root' => storage_path('app/temp'),
@@ -63,6 +71,7 @@ return [
         'certification' => [
             'driver' => 'local',
             'root' => storage_path('app/certifications'),
+            'url' => env('APP_URL').'/storage',
             'permissions' => [
                 'file' => [
                     'public' => 0644,
@@ -103,6 +112,7 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+        public_path('files') => storage_path('app/files'),
     ],
 
 ];
