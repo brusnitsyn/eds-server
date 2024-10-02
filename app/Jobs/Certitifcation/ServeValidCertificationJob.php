@@ -31,16 +31,19 @@ class ServeValidCertificationJob implements ShouldQueue
         $certifications = Certification::all();
 
         foreach ($certifications as $certification) {
-
             $now = Carbon::now();
             $validTo = Carbon::createFromTimestampMs(intval($certification->valid_to));
 
-            if (!$validTo->isFuture()) {
-                $certification->update(['is_valid' => false, 'is_request_new' => false]);
-                continue;
+            if ($validTo->isFuture()) {
+                $certification->update(['is_valid' => true]);
+                if ($now->diffInMonths($validTo) < 1)
+                    $certification->update(['is_request_new' => true]);
+                else
+                    $certification->update(['is_request_new' => false]);
+            } else {
+                $certification->update(['is_valid' => false]);
+                $certification->update(['is_request_new' => false]);
             }
-
-            if ($now->diffInMonths($validTo) < 1) $certification->update(['is_request_new' => true]);
 
         }
     }

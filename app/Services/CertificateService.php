@@ -33,22 +33,14 @@ class CertificateService
             ->setStatusCode(200);
     }
 
-    public function getInfoCertificate(string $disk, string $folder)
+    public function getInfoCertificate(string $pathToCert)
     {
-        $files = Storage::disk($disk)->files($folder);
-        $certificateFile = null;
-        foreach ($files as $file) {
-            if (pathinfo($file, PATHINFO_EXTENSION) == "cer") {
-                $certificateFile = Storage::disk($disk)->path($file);
-            }
-        }
-        Log::info($folder);
-        Log::info($files);
-        Log::info($certificateFile);
+        if ($pathToCert == null) {return;}
 
-        if ($certificateFile == null) {return;}
+        $pathToCert = Storage::path($pathToCert);
+        Log::info($pathToCert);
 
-        $certContents = file_get_contents($certificateFile);
+        $certContents = file_get_contents($pathToCert);
 
         $certificateCAPemContent = '-----BEGIN CERTIFICATE-----'.PHP_EOL
             .chunk_split(base64_encode($certContents), 64, PHP_EOL)

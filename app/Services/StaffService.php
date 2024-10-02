@@ -160,8 +160,21 @@ class StaffService
     public function createCert(string $certStorage, string $tempPath, string $folderName): void
     {
         if ($certStorage) {
-            $certStorageTempPath = pathinfo(Storage::disk('temp')->path($tempPath));
-            $certInfo = CertificateFacade::getInfoCertificate('certification', $folderName);
+            $certStoragePath = pathinfo(Storage::disk('certification')->path($folderName));
+
+            $certificateInfo = null;
+            $files = Storage::disk('certification')->files($folderName);
+            foreach ($files as $file) {
+                if (pathinfo($file, PATHINFO_EXTENSION) == "cer") {
+                    $certificateInfo = pathinfo($file);
+                }
+            }
+
+//            Log::info($certificateInfo);
+
+            $certificatePath = "certifications/{$certificateInfo['dirname']}/{$certificateInfo['basename']}";
+
+            $certInfo = CertificateFacade::getInfoCertificate($certificatePath);
 
             $createdStaff = Staff::where('snils', $certInfo['snils'])->first();
 
@@ -179,7 +192,8 @@ class StaffService
                 $certInfo['cert']['is_valid'] = false;
             }
 
-            $certInfo['cert']['path_certification'] = "certifications/{$certStorageTempPath['filename']}";
+            $certInfo['cert']['path_certification'] = "certifications/{$certificateInfo['dirname']}";
+            $certInfo['cert']['file_certification'] = $certificateInfo['basename'];
             $certInfo['full_name'] = "{$certInfo['last_name']} {$certInfo['first_name']} {$certInfo['middle_name']}";
             $certInfo['job_title'] = ucfirst(strtolower($certInfo['job_title']));
 

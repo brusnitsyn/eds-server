@@ -19,6 +19,7 @@ return new class extends Migration
             $table->boolean('is_valid')->default(false);
             $table->boolean('is_request_new')->default(false);
             $table->string('path_certification')->nullable();
+            $table->string('file_certification')->nullable();
             $table->foreignIdFor(\App\Models\Staff::class);
             $table->timestamps();
         });

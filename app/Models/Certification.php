@@ -17,6 +17,7 @@ class Certification extends Model
         'is_valid',
         'is_request_new',
         'path_certification',
+        'file_certification',
         'staff_id'
     ];
 
