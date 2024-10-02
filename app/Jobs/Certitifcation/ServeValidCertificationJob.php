@@ -35,7 +35,7 @@ class ServeValidCertificationJob implements ShouldQueue
             $now = Carbon::now();
             $validTo = Carbon::createFromTimestampMs(intval($certification->valid_to));
 
-            if ($certification->valid_to < $now->timestamp) {
+            if (!$validTo->isFuture()) {
                 $certification->update(['is_valid' => false, 'is_request_new' => false]);
                 continue;
             }
