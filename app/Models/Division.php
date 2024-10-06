@@ -17,4 +17,9 @@ class Division extends Model
     {
         return $this->hasMany(Staff::class);
     }
+
+    public function pacientFallEvents()
+    {
+        return $this->hasMany(PacientFallEvent::class);
+    }
 }
