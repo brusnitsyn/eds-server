@@ -28,6 +28,13 @@ Route::prefix('staff')->group(function () {
     });
 });
 
+Route::prefix('journal')->group(function () {
+    Route::prefix('fall')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\v1\PacientFallEventController::class, 'all']);
+        Route::post('/', [\App\Http\Controllers\Api\v1\PacientFallEventController::class, 'store']);
+    });
+});
+
 Route::prefix('division')->group(function () {
     Route::get('/', [\App\Http\Controllers\Api\v1\DivisionController::class, 'list']);
 });
