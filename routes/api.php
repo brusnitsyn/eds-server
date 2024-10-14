@@ -22,6 +22,7 @@ Route::prefix('auth')->group(function () {
 Route::prefix('staff')->group(function () {
     Route::get('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'all'])->middleware('auth:sanctum');
     Route::post('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'create'])->middleware('auth:sanctum');
+    Route::get('/export', [\App\Http\Controllers\Api\v1\StaffController::class, 'importExcel'])->middleware('auth:sanctum');
     Route::prefix('{staff}')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'get'])->middleware('auth:sanctum');
         Route::post('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'update'])->middleware('auth:sanctum');

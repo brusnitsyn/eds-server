@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Exports\StaffExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Staff\CreateStaffRequest;
 use App\Http\Requests\Staff\UpdateStaffRequest;
@@ -11,6 +12,7 @@ use App\Http\Resources\Staff\ShortStaffResource;
 use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StaffController extends Controller
 {
@@ -60,5 +62,11 @@ class StaffController extends Controller
     public function update(Staff $staff, UpdateStaffRequest $request)
     {
         return $request->update($staff);
+    }
+
+    public function importExcel(Request $request)
+    {
+        $validType = $request->query('valid_type');
+        return Excel::download(new StaffExport($validType ?? 'valid'), 'staffs.xlsx');
     }
 }
