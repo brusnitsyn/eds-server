@@ -31,9 +31,6 @@ class ArchiveUploadRequest extends FormRequest
 
     public function upload()
     {
-        \Log::info('Certification Archive Upload Request');
-        \Log::info($this->validated('archive'));
-        \Log::info($this->validated('is_package'));
         return StaffFacade::create($this->validated());
     }
 }
