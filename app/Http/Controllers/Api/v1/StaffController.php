@@ -10,6 +10,7 @@ use App\Http\Resources\Staff\FullStaffResource;
 use App\Http\Resources\Staff\ShortStaffCollection;
 use App\Http\Resources\Staff\ShortStaffResource;
 use App\Models\Staff;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
@@ -19,9 +20,20 @@ class StaffController extends Controller
     public function all(Request $request)
     {
         $query = Staff::query();
+
         $searchColumn = $request->query('search_from');
         $searchValue = $request->query('search_value');
         $validType = $request->query('valid_type');
+
+        $sortColumn = $request->query('sort_column', 'full_name');
+        $sortDirection = $request->query('sort_direction', 'asc');
+
+        if ($sortDirection === 'descend') $sortDirection = 'desc';
+        else if ($sortDirection === 'ascend') $sortDirection = 'asc';
+        else {
+            $sortColumn = 'full_name';
+            $sortDirection = 'asc';
+        }
 
         if (!is_null($validType)) {
             switch ($validType) {
@@ -42,7 +54,15 @@ class StaffController extends Controller
             $query->where($searchColumn, 'ilike', $searchValue . '%');
         }
 
-        $query->orderBy('full_name', 'ASC');
+        switch ($sortColumn) {
+            case 'certificate.valid_to':
+                $query->leftJoin('certifications', function (JoinClause $join) {
+                    $join->on('staff.id', '=', 'certifications.staff_id');
+                })->orderBy('certifications.valid_to', $sortDirection);
+                break;
+                default: $query->orderBy($sortColumn, $sortDirection);
+        }
+
 
         $staff = $query->paginate(30);
 

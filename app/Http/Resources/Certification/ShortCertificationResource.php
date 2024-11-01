@@ -19,8 +19,8 @@ class ShortCertificationResource extends JsonResource
             'serial_number' => $this->serial_number,
             'valid_from' => (int)$this->valid_from,
             'valid_to' => (int)$this->valid_to,
-            'has_valid' => $this->actual()['has_valid'],
-            'has_request_new' => $this->actual()['has_request_new']
+            'has_valid' => $this->is_valid,
+            'has_request_new' => $this->is_request_new
         ];
     }
 }
