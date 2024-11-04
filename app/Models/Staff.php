@@ -32,4 +32,9 @@ class Staff extends Model
     {
         return $this->hasOne(Certification::class);
     }
+
+    public function integrations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(StaffIntegrate::class);
+    }
 }
