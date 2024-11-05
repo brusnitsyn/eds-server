@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static create(array $data)
  * @method static get(array $data)
  * @method static update(Staff $staff, array $data)
+ * @method static createIntegrated(Staff $staff, array $data)
  *
  * @see \App\Services\StaffService
  */
