@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Facades\CertificateFacade;
 use App\Models\Staff;
+use App\Models\StaffIntegrate;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -78,6 +79,8 @@ class StaffService
         if (Storage::disk('temp')->exists($tempPath)) {
             Storage::disk('temp')->deleteDirectory($tempPath);
             Storage::disk('temp')->makeDirectory($tempPath);
+        } else {
+            Storage::disk('temp')->makeDirectory($tempPath);
         }
 
         $zipTool->extractTo($extractionPath);
@@ -95,12 +98,14 @@ class StaffService
         $zipTool = new ZipFile();
         $zipTool->openFile($archivePath);
 
-        $extractionPath = storage_path("app/temp/$extractToFolder");
-
         if (Storage::disk('temp')->exists($extractToFolder)) {
             Storage::disk('temp')->deleteDirectory($extractToFolder);
             Storage::disk('temp')->makeDirectory($extractToFolder);
+        } else {
+            Storage::disk('temp')->makeDirectory($extractToFolder);
         }
+
+        $extractionPath = storage_path("app/temp/$extractToFolder");
 
         $zipTool->extractTo($extractionPath);
         $zipTool->close();
@@ -235,5 +240,17 @@ class StaffService
 
             $createdStaff->certification()->update($certInfo['cert']);
         }
+    }
+
+    public function createIntegrate(Staff $staff, array $data)
+    {
+        $createdIntegrate = $staff->integrations()->create($data);
+        return $createdIntegrate;
+    }
+
+    public function updateIntegrate(StaffIntegrate $staffIntegrate, array $data)
+    {
+        $updateIntegrate = $staffIntegrate->update($data);
+        return $updateIntegrate;
     }
 }

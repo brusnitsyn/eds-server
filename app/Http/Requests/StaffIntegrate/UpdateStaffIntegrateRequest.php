@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests\StaffIntegrated;
+namespace App\Http\Requests\StaffIntegrate;
 
-use App\Facades\StaffFacade;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateStaffIntegratedRequest extends FormRequest
+class UpdateStaffIntegrateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,10 +22,10 @@ class CreateStaffIntegratedRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['string'],
-            'login' => ['string'],
-            'password' => ['string'],
-            'url' => ['string', 'nullable'],
+            'name' => ['nullable', 'string'],
+            'login' => ['nullable', 'string'],
+            'password' => ['nullable', 'string'],
+            'link' => ['string', 'nullable'],
         ];
     }
 }

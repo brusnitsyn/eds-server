@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Staff;
 
 use App\Http\Resources\Certification\ShortCertificationResource;
+use App\Http\Resources\StaffIntegrate\StaffIntegrateResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -28,7 +29,8 @@ class FullStaffResource extends JsonResource
             'job_title' => $this->job_title,
             'tel' => $this->tel,
             'division_id' => $this->division_id,
-            'cert' => ShortCertificationResource::make($this->certification)
+            'cert' => ShortCertificationResource::make($this->certification),
+            'integrations' => StaffIntegrateResource::collection($this->integrations),
         ];
     }
 }

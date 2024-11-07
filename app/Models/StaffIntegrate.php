@@ -15,7 +15,8 @@ class StaffIntegrate extends Model
         'login',
         'password',
         'link',
-        'staff_id'
+        'staff_id',
+        'deleted_at'
     ];
 
     public function staff(): \Illuminate\Database\Eloquent\Relations\HasOne
