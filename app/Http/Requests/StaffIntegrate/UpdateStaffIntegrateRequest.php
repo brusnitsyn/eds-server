@@ -25,7 +25,7 @@ class UpdateStaffIntegrateRequest extends FormRequest
             'name' => ['nullable', 'string'],
             'login' => ['nullable', 'string'],
             'password' => ['nullable', 'string'],
-            'link' => ['string', 'nullable'],
+            'link' => ['nullable', 'string'],
         ];
     }
 }

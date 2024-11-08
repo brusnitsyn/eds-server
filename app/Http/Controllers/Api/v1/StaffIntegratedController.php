@@ -17,7 +17,7 @@ class StaffIntegratedController extends Controller
         return StaffFacade::createIntegrate($staff, $request->validated());
     }
 
-    public function update(StaffIntegrate $staffIntegrate, UpdateStaffIntegrateRequest $request)
+    public function update(Staff $staff, StaffIntegrate $staffIntegrate, UpdateStaffIntegrateRequest $request)
     {
         return StaffFacade::updateIntegrate($staffIntegrate, $request->validated());
     }
