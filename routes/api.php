@@ -36,6 +36,7 @@ Route::prefix('staff')->group(function () {
             Route::post('/', [\App\Http\Controllers\Api\v1\StaffIntegratedController::class, 'create'])->middleware('auth:sanctum');
             Route::prefix('{staffIntegrate}')->group(function () {
                 Route::delete('/', [\App\Http\Controllers\Api\v1\StaffIntegratedController::class, 'delete'])->middleware('auth:sanctum');
+                Route::put('/', [\App\Http\Controllers\Api\v1\StaffIntegratedController::class, 'update'])->middleware('auth:sanctum');
             });
         });
     });

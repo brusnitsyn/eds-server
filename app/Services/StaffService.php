@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Facades\CertificateFacade;
+use App\Http\Resources\StaffIntegrate\StaffIntegrateResource;
 use App\Models\Staff;
 use App\Models\StaffIntegrate;
 use Illuminate\Support\Carbon;
@@ -245,12 +246,12 @@ class StaffService
     public function createIntegrate(Staff $staff, array $data)
     {
         $createdIntegrate = $staff->integrations()->create($data);
-        return $createdIntegrate;
+        return StaffIntegrateResource::make($createdIntegrate);
     }
 
     public function updateIntegrate(StaffIntegrate $staffIntegrate, array $data)
     {
-        $updateIntegrate = $staffIntegrate->update($data);
-        return $updateIntegrate;
+        $staffIntegrate->update($data);
+        return StaffIntegrateResource::make($staffIntegrate);
     }
 }
