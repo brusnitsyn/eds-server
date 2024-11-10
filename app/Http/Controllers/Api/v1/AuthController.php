@@ -9,6 +9,7 @@ use App\Http\Resources\Auth\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends Controller
 {
@@ -31,5 +32,10 @@ class AuthController extends Controller
         Auth::login($user);
 
         return '';
+    }
+
+    public function crypt()
+    {
+        return Crypt::encryptString('один два три');
     }
 }
