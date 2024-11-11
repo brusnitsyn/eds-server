@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Exports\StaffExport;
+use App\Facades\StaffFacade;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Staff\CreateStaffRequest;
 use App\Http\Requests\Staff\UpdateStaffRequest;
@@ -82,6 +83,11 @@ class StaffController extends Controller
     public function update(Staff $staff, UpdateStaffRequest $request)
     {
         return $request->update($staff);
+    }
+
+    public function delete(Staff $staff)
+    {
+        return StaffFacade::delete($staff);
     }
 
     public function importExcel(Request $request)
