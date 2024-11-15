@@ -29,6 +29,9 @@ class FullStaffResource extends JsonResource
             'job_title' => $this->job_title,
             'tel' => $this->tel,
             'division_id' => $this->division_id,
+            'mis_user_id' => $this->mis_user_id,
+            'mis_guid' => $this->mis_guid,
+            'mis_sync_at' => $this->mis_sync_at,
             'cert' => ShortCertificationResource::make($this->certification),
             'integrations' => StaffIntegrateResource::collection($this->integrations),
         ];

@@ -8,3 +8,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 \Illuminate\Support\Facades\Schedule::job(new \App\Jobs\Certitifcation\ServeValidCertificationJob)->daily();
+\Illuminate\Support\Facades\Schedule::job(new \App\Jobs\Mis\SyncCertificationsJob())->daily();

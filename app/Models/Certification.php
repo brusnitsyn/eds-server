@@ -18,7 +18,11 @@ class Certification extends Model
         'is_request_new',
         'path_certification',
         'file_certification',
-        'staff_id'
+        'mis_serial_number',
+        'mis_valid_from',
+        'mis_valid_to',
+        'mis_is_identical',
+        'staff_id',
     ];
 
     public function staff(): \Illuminate\Database\Eloquent\Relations\HasOne

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Exports\StaffExport;
+use App\Facades\StaffFacade;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Staff\CreateStaffRequest;
 use App\Http\Requests\Staff\UpdateStaffRequest;
@@ -13,6 +14,7 @@ use App\Models\Staff;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class StaffController extends Controller
@@ -82,6 +84,31 @@ class StaffController extends Controller
     public function update(Staff $staff, UpdateStaffRequest $request)
     {
         return $request->update($staff);
+    }
+
+    public function delete(Staff $staff)
+    {
+        $hasStaffDeleted = $staff->delete();
+        return $hasStaffDeleted;
+    }
+
+    public function syncMis(Staff $staff)
+    {
+        $misUser = DB::connection('mis')->table('dbo.x_User')->where('FIO', $staff->full_name)->first();
+        if ($misUser)
+        {
+            $staff->integrations()->updateOrCreate(['name' => 'ТМ:МИС'], ['name' => 'ТМ:МИС', 'login' => $misUser->GeneralLogin]);
+        }
+    }
+
+    public function insertCertMis(Staff $staff)
+    {
+        return StaffFacade::insertCertToMis($staff);
+    }
+
+    public function updateCertSetting(Staff $staff)
+    {
+
     }
 
     public function importExcel(Request $request)

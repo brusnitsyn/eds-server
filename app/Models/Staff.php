@@ -20,6 +20,9 @@ class Staff extends Model
         'gender',
         'dob',
         'tel',
+        'mis_user_id',
+        'mis_guid',
+        'mis_sync_at',
         'division_id',
     ];
 

@@ -20,7 +20,8 @@ class ShortCertificationResource extends JsonResource
             'valid_from' => (int)$this->valid_from,
             'valid_to' => (int)$this->valid_to,
             'has_valid' => $this->is_valid,
-            'has_request_new' => $this->is_request_new
+            'has_request_new' => $this->is_request_new,
+            'has_mis_identical' => $this->mis_is_identical
         ];
     }
 }

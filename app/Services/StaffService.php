@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Facades\CertificateFacade;
 use App\Http\Resources\StaffIntegrate\StaffIntegrateResource;
+use App\Models\MisStaffSettingsOption;
 use App\Models\Staff;
 use App\Models\StaffIntegrate;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PhpZip\ZipFile;
@@ -237,9 +239,16 @@ class StaffService
             if (!$createdStaff) {
                 $createdStaff = Staff::create($certInfo);
                 $createdStaff->certification()->create($certInfo['cert']);
+            } else {
+                $createdStaff->update($certInfo);
+                $createdStaff->certification()->update($certInfo['cert']);
             }
 
-            $createdStaff->certification()->update($certInfo['cert']);
+            $misUser = DB::connection('mis')->table('dbo.x_User')->where('FIO', $createdStaff->full_name)->first();
+            if ($misUser)
+            {
+                $createdStaff->integrations()->updateOrCreate(['name' => 'ТМ:МИС'], ['name' => 'ТМ:МИС', 'login' => $misUser->GeneralLogin]);
+            }
         }
     }
 
@@ -253,5 +262,81 @@ class StaffService
     {
         $staffIntegrate->update($data);
         return StaffIntegrateResource::make($staffIntegrate);
+    }
+
+    public function insertCertToMis(Staff $staff)
+    {
+        if (!$staff->certification()->exists()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'У указаного пользователя нет сертификата!'
+            ]);
+        }
+
+        if ($staff->mis_user_id == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Пользователя нет в ТМ:МИС!'
+            ]);
+        }
+
+        $misCertSettingOption = MisStaffSettingsOption::where('key', 'nomer-sertifikata-polzovatelya')->first();
+        $misCertValidFromSettingOption = MisStaffSettingsOption::where('key', 'sertifikat-deystvitelen-s')->first();
+        $misCertValidToSettingOption = MisStaffSettingsOption::where('key', 'sertifikat-deystvitelen-po')->first();
+
+        $baseModelSetting = [
+            'rf_UserID' => $staff->mis_user_id,
+            'OwnerGUID' => '00000000-0000-0000-0000-000000000000',
+            'DocTypeDefGUID' => '00000000-0000-0000-0000-000000000000',
+        ];
+
+        $certSettingModel = [
+            'rf_SettingTypeID' => $misCertSettingOption->setting_type,
+            'Property' => $misCertSettingOption->property,
+            'ValueStr' => $staff->certification->serial_number,
+        ];
+
+        $certValidFromModel = [
+            'rf_SettingTypeID' => $misCertValidFromSettingOption->setting_type,
+            'Property' => $misCertValidFromSettingOption->property,
+            'ValueStr' => $staff->certification->valid_from,
+        ];
+
+        $certValidToModel = [
+            'rf_SettingTypeID' => $misCertValidToSettingOption->setting_type,
+            'Property' => $misCertValidToSettingOption->property,
+            'ValueStr' => $staff->certification->valid_to,
+        ];
+
+        DB::connection('mis')->table('amu_mis_AOKB_prod.dbo.x_UserSettings')->updateOrInsert([
+            'rf_UserID' => $staff->mis_user_id,
+            'Property' => $misCertSettingOption->property,
+        ], array_merge($baseModelSetting, $certSettingModel));
+
+        DB::connection('mis')->table('amu_mis_AOKB_prod.dbo.x_UserSettings')->updateOrInsert([
+            'rf_UserID' => $staff->mis_user_id,
+            'Property' => $misCertValidFromSettingOption->property,
+        ], array_merge($baseModelSetting, $certValidFromModel));
+
+        DB::connection('mis')->table('amu_mis_AOKB_prod.dbo.x_UserSettings')->updateOrInsert([
+            'rf_UserID' => $staff->mis_user_id,
+            'Property' => $misCertValidToSettingOption->property,
+        ], array_merge($baseModelSetting, $certValidToModel));
+
+        $staff->certification()->update([
+            'mis_serial_number' => $staff->certification->serial_number,
+            'mis_valid_from' => $staff->certification->valid_from,
+            'mis_valid_to' => $staff->certification->valid_to,
+            'mis_is_identical' => true
+        ]);
+
+        $staff->update([
+            'mis_sync_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Сертификат пользователя был прописан в МИС'
+        ]);
     }
 }

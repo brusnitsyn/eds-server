@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,13 @@ Route::prefix('staff')->group(function () {
     Route::prefix('{staff}')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'get'])->middleware('auth:sanctum');
         Route::post('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'update'])->middleware('auth:sanctum');
+        Route::delete('/', [\App\Http\Controllers\Api\v1\StaffController::class, 'delete'])->middleware('auth:sanctum');
+        Route::get('/sync', [\App\Http\Controllers\Api\v1\StaffController::class, 'syncMis'])->middleware('auth:sanctum');
+
+        Route::prefix('mis')->group(function () {
+            Route::get('/set', [\App\Http\Controllers\Api\v1\StaffController::class, 'insertCertMis'])->middleware('auth:sanctum');
+        });
+
         Route::prefix('integrate')->group(function () {
             Route::post('/', [\App\Http\Controllers\Api\v1\StaffIntegratedController::class, 'create'])->middleware('auth:sanctum');
             Route::prefix('{staffIntegrate}')->group(function () {
@@ -70,3 +78,5 @@ Route::prefix('admin')->group(function () {
         });
     });
 });
+
+Route::get('/test', [TestController::class, 'test']);
