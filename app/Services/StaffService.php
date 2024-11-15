@@ -252,6 +252,15 @@ class StaffService
         }
     }
 
+    public function delete(Staff $staff)
+    {
+        $hasDeleteCert = Storage::disk('local')->deleteDirectory($staff->certification->path_certification);
+        $staff->delete();
+        return response()->json([
+            'status' => 'success',
+        ]);
+    }
+
     public function createIntegrate(Staff $staff, array $data)
     {
         $createdIntegrate = $staff->integrations()->create($data);

@@ -88,8 +88,7 @@ class StaffController extends Controller
 
     public function delete(Staff $staff)
     {
-        $hasStaffDeleted = $staff->delete();
-        return $hasStaffDeleted;
+        return StaffFacade::delete($staff);
     }
 
     public function syncMis(Staff $staff)
