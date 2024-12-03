@@ -52,7 +52,12 @@ class CertificateService
 
         $serialNumber = $parsedCert['serialNumber'];
 
-        if(intval($serialNumber)) $serialNumber = strtoupper($this->bcdechex($parsedCert['serialNumber']));
+        if(intval($serialNumber)) {
+            $serialNumber = strtoupper($this->bcdechex($parsedCert['serialNumber']));
+            if (strlen($serialNumber) % 2 !== 0) {
+                $serialNumber = '0' . $serialNumber;
+            }
+        }
         if(Str::contains($serialNumber, '0x')) $serialNumber = Str::replace('0x', '00', $serialNumber);
 
         $parsedSubject = $parsedCert['subject'];
