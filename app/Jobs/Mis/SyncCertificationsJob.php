@@ -45,7 +45,7 @@ class SyncCertificationsJob implements ShouldQueue
             $misUserCertificationValidTo = $misUserSettings->where('Property', '=', $misCertValidToSettingOption->property)->select('ValueStr')->first();
 
             $staff->certification()->update([
-                'mis_serial_number' => $misUserCertification['ValueStr'],
+                'mis_serial_number' => $misUserCertification['ValueStr'] ?? null,
                 'mis_valid_from' => $misUserCertificationValidFrom['ValueStr'] ?? null,
                 'mis_valid_to' => $misUserCertificationValidTo['ValueStr'] ?? null,
                 'mis_is_identical' => $misUserCertification['ValueStr'] && Str::contains($staff->certification->serial_number, $misUserCertification['ValueStr'], true)
