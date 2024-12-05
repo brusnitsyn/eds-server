@@ -44,12 +44,21 @@ class SyncCertificationsJob implements ShouldQueue
             $misUserCertificationValidFrom = $misUserSettings->where('Property', '=', $misCertValidFromSettingOption->property)->select('ValueStr')->first();
             $misUserCertificationValidTo = $misUserSettings->where('Property', '=', $misCertValidToSettingOption->property)->select('ValueStr')->first();
 
-            $staff->certification()->update([
-                'mis_serial_number' => $misUserCertification['ValueStr'] ?? null,
-                'mis_valid_from' => $misUserCertificationValidFrom['ValueStr'] ?? null,
-                'mis_valid_to' => $misUserCertificationValidTo['ValueStr'] ?? null,
-                'mis_is_identical' => $misUserCertification['ValueStr'] && Str::contains($staff->certification->serial_number, $misUserCertification['ValueStr'], true)
-            ]);
+            if ($misUserCertification === null) {
+                $staff->certification()->update([
+                    'mis_serial_number' => null,
+                    'mis_valid_from' => $misUserCertificationValidFrom['ValueStr'] ?? null,
+                    'mis_valid_to' => $misUserCertificationValidTo['ValueStr'] ?? null,
+                    'mis_is_identical' => false
+                ]);
+            } else {
+                $staff->certification()->update([
+                    'mis_serial_number' => $misUserCertification['ValueStr'],
+                    'mis_valid_from' => $misUserCertificationValidFrom['ValueStr'] ?? null,
+                    'mis_valid_to' => $misUserCertificationValidTo['ValueStr'] ?? null,
+                    'mis_is_identical' => $misUserCertification['ValueStr'] && Str::contains($staff->certification->serial_number, $misUserCertification['ValueStr'], true)
+                ]);
+            }
 
             $staff->update([
                 'mis_sync_at' => Carbon::now(),
